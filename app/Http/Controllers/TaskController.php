@@ -37,7 +37,40 @@ class TaskController extends Controller {
         $task->assign_to = $request->assign_to;
         $task->save();
 
-        return response()->json(['success' => true], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Task created successfully'
+        ], 200);
+
+    }
+
+    public function update(Request $request, $id){
+
+        $existingTask = $request->auth->task()->find($id);
+        if (!$existingTask instanceof Task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task does not exist!'
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'Task does exist!'
+            ]);
+        }
+
+        // $task = Task::findOrFail($id);
+        // $task->title = $request->title;
+        // $task->description = $request->description;
+        // $task->status = $request->status;
+        // $task->created_by = $request->created_by;
+        // $task->assign_to = $request->assign_to;
+        // $task->save();
+
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Task updated successfully!'
+        // ], 200);
 
     }
 

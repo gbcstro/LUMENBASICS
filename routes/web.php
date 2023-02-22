@@ -20,4 +20,5 @@ $router->get('/', function () use ($router) {
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('/tasks', 'TaskController@index');
     $router->post('/add', 'TaskController@add');
+    $router->put('/update/{id}', 'TaskController@update');
 });
