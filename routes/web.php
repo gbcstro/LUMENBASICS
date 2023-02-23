@@ -23,4 +23,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->put('/update/{id}', 'TaskController@update');
     $router->delete('/delete/{id}', 'TaskController@delete');
     $router->delete('/deleteAll', 'TaskController@deleteAll');
+
+    $router->post('/login', 'AuthController@login');
+    $router->post('/register', 'AuthController@register');
 });
