@@ -46,32 +46,67 @@ class TaskController extends Controller {
 
     public function update(Request $request, $id){
 
-        $existingTask = $request->auth->task()->find($id);
-        if (!$existingTask instanceof Task) {
+        if (Task::where('id', $id)->exists()){
+
+            $validator = Validator::make($request->all(), [
+                'title' => 'required',
+                'description' => 'required',
+                'status' => 'required|in:active,inactive',
+                'created_by' => 'required',
+                'assign_to' => 'required',
+            ]);
+    
+            if ($validator->fails()) {
+                return array(
+                    'success' => false,
+                    'message' => $validator->errors()->all()
+                );
+            }
+
+            $task = Task::find($id); 
+            $task->title = $request->title;
+            $task->description = $request->description;
+            $task->status = $request->status;
+            $task->created_by = $request->created_by;
+            $task->assign_to = $request->assign_to;
+            $task->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Task updated successfully!'
+            ], 200);
+
+        } else {
             return response()->json([
                 'success' => false,
                 'message' => 'Task does not exist!'
-            ]);
-        } else {
-            return response()->json([
-                'success' => true,
-                'message' => 'Task does exist!'
-            ]);
+            ], 200);
         }
 
-        // $task = Task::findOrFail($id);
-        // $task->title = $request->title;
-        // $task->description = $request->description;
-        // $task->status = $request->status;
-        // $task->created_by = $request->created_by;
-        // $task->assign_to = $request->assign_to;
-        // $task->save();
+    }
 
-        // return response()->json([
-        //     'success' => true,
-        //     'message' => 'Task updated successfully!'
-        // ], 200);
+    public function delete($id){
+        if (Task::where('id', $id)->exists()){
+            $task = Task::find($id); 
+            $task->delete();
 
+            return response()->json([
+                'success' => true,
+                'message' => 'Task deleted successfully!'
+            ], 200);
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task does not exist!'
+            ], 200);
+        }
+    }
+
+
+    public function deleteAll(){
+        return Task::truncate();
+        
     }
 
 }
