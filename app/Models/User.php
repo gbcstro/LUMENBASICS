@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract {
+use App\Models\Task;
+
+class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject {
     use Authenticatable, Authorizable, HasFactory;
 
     public $table = 'user';
@@ -42,4 +44,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return [];
     }
 
+    public function tasks() {
+        return $this->hasMany(Task::class);
+    }
 }

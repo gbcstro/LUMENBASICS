@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use GuzzleHttp\Exception\BadResponseException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller {
 
@@ -14,14 +15,33 @@ class AuthController extends Controller {
     }
 
     public function login(Request $request) {
+        
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required'
+        ]);
 
-        $email = $request->email;
-        $password = $request->password;
-
-        if (empty($email) || empty($password)){
+        if($validator->fails()) {
+            return array(
+                'success' => false,
+                'message' => $validator->errors()->all()
+            );
+        }
+       
+        $input = $request->only('email', 'password');
+        $authorized = Auth::attempt($input);
+        
+        if( !$authorized ){
+            return array(
+                'success' => 401,
+                'message' => 'User is not authorized'
+            ); 
+        } else {
+            $token = $this->respondWithToken($authorized);
             return response()->json([
-                'status' => 'error',
-                'message' => 'You must fill all fields'
+                'code' => 201,
+                'message' => 'User logged in success',
+                'token' => $token
             ]);
         }
 
@@ -32,8 +52,8 @@ class AuthController extends Controller {
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|unique:users|email',
-            'password' => 'required|confirmed'
+            'email' => 'required|email|unique:user',
+            'password' => 'required'
         ]);
 
         if($validator->fails()) {
@@ -58,7 +78,7 @@ class AuthController extends Controller {
             'message' => 'User registered successfully'
         ], 200);
 
-
     }
+
     
 }

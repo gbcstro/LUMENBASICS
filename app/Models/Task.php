@@ -6,9 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Task extends Model {
+
     use HasFactory;
 
     public $table = 'tasks';
+
+    public function users(){
+        return $this->hasOne(User::class);
+    }
 
     /**
      * The attributes that are mass assignable.
