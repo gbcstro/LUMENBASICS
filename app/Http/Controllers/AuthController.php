@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller {
 
     public function __construct() {
-        
+        $this->middleware('auth:api',['except' => ['me','login', 'register'] ]);
     }
 
     public function login(Request $request) {
@@ -32,19 +32,21 @@ class AuthController extends Controller {
         $authorized = Auth::attempt($input);
         
         if( !$authorized ){
-            return array(
-                'success' => 401,
-                'message' => 'User is not authorized'
-            ); 
+            $code = 401;
+            $output = [
+                'code' => $code,
+                'message' => 'User does not exist'
+            ];
         } else {
             $token = $this->respondWithToken($authorized);
-            return response()->json([
-                'code' => 201,
-                'message' => 'User logged in success',
+            $code = 201;
+            $output = [
+                'code' => $code,
+                'message' => 'User logged in succesfully',
                 'token' => $token
-            ]);
+            ];
         }
-
+        return response()->json($output, $code);
     }
 
     public function register(Request $request) {
@@ -78,6 +80,23 @@ class AuthController extends Controller {
             'message' => 'User registered successfully'
         ], 200);
 
+    }
+
+    public function me(){
+        return response()->json($this->guard()->user());
+    }
+
+    public function refresh(){
+        return $this->respondWithToken($this->guard()->refresh());
+    }
+
+    public function logout(){
+        $this->guard()->logout();
+        return response()->json(['message' => 'Logged Out!']);
+    }
+
+    public function guard(){
+        return Auth::guard();
     }
 
     

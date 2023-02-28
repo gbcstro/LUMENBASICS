@@ -33,7 +33,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var string[]
      */
     protected $hidden = [
-        'password',
+        'password', 'id', 'created_at', 'updated_at'
     ];
     
     public function getJWTIdentifier() {

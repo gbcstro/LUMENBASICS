@@ -18,12 +18,15 @@ $router->get('/', function () use ($router) {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('/tasks', 'TaskController@index');
-    $router->post('/add', 'TaskController@add');
-    $router->put('/update/{id}', 'TaskController@update');
-    $router->delete('/delete/{id}', 'TaskController@delete');
-    $router->delete('/deleteAll', 'TaskController@deleteAll');
+    $router->get('tasks', 'TaskController@index');
+    $router->post('add', 'TaskController@add');
+    $router->put('update/{id}', 'TaskController@update');
+    $router->delete('delete/{id}', 'TaskController@delete');
+    $router->delete('deleteAll', 'TaskController@deleteAll');
 
-    $router->post('/login', 'AuthController@login');
-    $router->post('/register', 'AuthController@register');
+    $router->post('login', 'AuthController@login');
+    $router->post('register', 'AuthController@register');
+    $router->get('me', 'AuthController@me');
+    $router->get('refresh', 'AuthController@refresh');
+    $router->post('logout', 'AuthController@logout');
 });
