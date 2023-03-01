@@ -13,6 +13,11 @@ class TaskController extends Controller {
         return Task::all();
     }
 
+    public function get($id){
+        $task = Task::where('id',$id)->first();
+        return response()->json($task);
+    }
+
     public function add(Request $request) {
         $validator = Validator::make($request->all(), [
             'title' => 'required',
@@ -39,7 +44,8 @@ class TaskController extends Controller {
 
         return response()->json([
             'success' => true,
-            'message' => 'Task created successfully'
+            'message' => 'Task created successfully',
+            'task' => $task
         ], 200);
 
     }
@@ -51,7 +57,7 @@ class TaskController extends Controller {
             $validator = Validator::make($request->all(), [
                 'title' => 'required',
                 'description' => 'required',
-                'status' => 'required|in:active,inactive',
+                'status' => 'required',
                 'created_by' => 'required',
                 'assign_to' => 'required',
             ]);
@@ -63,7 +69,7 @@ class TaskController extends Controller {
                 );
             }
 
-            $task = Task::find($id); 
+            $task = Task::find($id);
             $task->title = $request->title;
             $task->description = $request->description;
             $task->status = $request->status;
