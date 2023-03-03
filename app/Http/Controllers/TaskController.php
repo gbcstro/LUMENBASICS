@@ -91,6 +91,37 @@ class TaskController extends Controller {
 
     }
 
+    public function assign(Request $request, $id){
+        if (Task::where('id', $id)->exists()){
+
+            $validator = Validator::make($request->all(), [
+                'assign_to' => 'required',
+            ]);
+    
+            if ($validator->fails()) {
+                return array(
+                    'success' => false,
+                    'message' => $validator->errors()->all()
+                );
+            }
+
+            $task = Task::find($id);
+            $task->assign_to = $request->assign_to;
+            $task->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Task updated successfully!'
+            ], 200);
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task does not exist!'
+            ], 200);
+        }
+    }
+
     public function delete($id){
         if (Task::where('id', $id)->exists()){
             $task = Task::find($id); 
