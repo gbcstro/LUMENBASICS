@@ -17,6 +17,10 @@ $router->get('/', function () use ($router) {
     return $router->app->version(); 
 });
 
+
+$router->get('/send-email', 'EmailController@sendResetPasswordEmail');
+$router->post('/email/verify', ['as' => 'email.verify', 'uses' => 'AuthController@emailVerify']);
+
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('tasks', 'TaskController@index');
     $router->get('/task/{id}', 'TaskController@get');
@@ -26,6 +30,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->delete('delete/{id}', 'TaskController@delete');
     $router->delete('deleteAll', 'TaskController@deleteAll');
 
+    $router->get('user', 'AuthController@user');
     $router->post('login', 'AuthController@login');
     $router->post('register', 'AuthController@register');
     $router->get('me', 'AuthController@me');
