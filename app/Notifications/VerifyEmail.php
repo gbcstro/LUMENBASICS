@@ -9,8 +9,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class VerifyEmail extends Notification
-{
+class VerifyEmail extends Notification {
     use Queueable;
 
     /**
@@ -44,15 +43,16 @@ class VerifyEmail extends Notification
     */
 
     public function toMail($notifiable) {
-        $verificationUrl = $this->verificationUrl($notifiable);
-        dd($verificationUrl);
+       $verficationURL = $this->verificationUrl($notifiable);
+        
         if (static::$toMailCallback) {
-            return call_user_func(static::$toMailCallback, $notifiable, $verificationUrl);
+            return call_user_func(static::$toMailCallback, $notifiable,$verficationURL);
         }
+        
         return (new MailMessage)
             ->subject(Lang::get('Verify Email Address'))
             ->line(Lang::get('Please click the button below to verify your email address.'))
-            ->action(Lang::get('Verify Email Address'), $verificationUrl)
+            ->action(Lang::get('Verify Email Address'), $verficationURL)
             ->line(Lang::get('If you did not create an account, no further action is required.'));
     }
 
@@ -65,7 +65,7 @@ class VerifyEmail extends Notification
 
     protected function verificationUrl($notifiable) {
         $token = JWTAuth::fromUser($notifiable);
-        return route('email.verify', ['token' => $token], false);
+        return route('email.redirect', ['token' => $token], false);
     }
 
     /**

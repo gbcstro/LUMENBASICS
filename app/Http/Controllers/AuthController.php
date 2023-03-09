@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller {
 
     public function __construct() {
-        $this->middleware('auth:api',['except' => ['user','me','login', 'register'] ]);
+        $this->middleware('auth:api',['except' => ['user','me','login', 'register', 'emailVerify', 'routeEmailVerify']]);
     }
 
     public function login(Request $request) {
@@ -66,7 +66,6 @@ class AuthController extends Controller {
         }
 
         $user = new User;
-
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->email = $request->email;
@@ -115,11 +114,14 @@ class AuthController extends Controller {
     }
 
     public function emailVerify(Request $request) {
+        
         $this->validate($request, [
         'token' => 'required|string',
         ]);
+
         \Tymon\JWTAuth\Facades\JWTAuth::getToken();
         \Tymon\JWTAuth\Facades\JWTAuth::parseToken()->authenticate();
+        
         if ( ! $request->user() ) {
             return response()->json('Invalid token', 401);
         }
@@ -130,6 +132,17 @@ class AuthController extends Controller {
 
         $request->user()->markEmailAsVerified();
         return response()->json('Email address '. $request->user()->email.' successfully verified.');
+    }
+
+
+    public function routeEmailVerify(Request $request){
+        $this->validate($request, [
+            'token' => 'required|string',
+        ]);
+
+        $token = $request->token;
+
+        return redirect("http://localhost:4200/email/verify?token=$token");
     }
 
 }

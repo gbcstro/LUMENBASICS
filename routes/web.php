@@ -19,7 +19,7 @@ $router->get('/', function () use ($router) {
 
 
 $router->get('/send-email', 'EmailController@sendResetPasswordEmail');
-$router->post('/email/verify', ['as' => 'email.verify', 'uses' => 'AuthController@emailVerify']);
+
 
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('tasks', 'TaskController@index');
@@ -37,3 +37,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('refresh', 'AuthController@refresh');
     $router->post('logout', 'AuthController@logout');
 });
+
+$router->group(['middleware' => ['auth','verified']], function () use ($router) {
+    $router->post('email/request-verification', ['as' => 'email.request.verification', 'uses' => 'AuthController@emailRequestVerification']);
+
+});
+
+$router->get('redirect/email',['as' => 'email.redirect', 'uses' => 'AuthController@routeEmailVerify']);
+$router->post('email/verify', 'AuthController@emailVerify');
