@@ -5,18 +5,21 @@ namespace App\Models;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Traits\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Auth\Passwords\CanResetPassword;
 
 use App\Models\Task;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject {
+
+class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject, CanResetPasswordContract {
     
-    use Authenticatable, Authorizable, HasFactory, Notifiable, MustVerifyEmail;
+    use Authenticatable, Authorizable, HasFactory, Notifiable, MustVerifyEmail, CanResetPassword;
 
     public $table = 'user';
 
@@ -36,7 +39,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var string[]
      */
     protected $hidden = [
-        'password', 'id', 'created_at', 'updated_at'
+        'password', 'id', 'created_at', 'updated_at', 'remember_token'
     ];
 
     protected $casts = [

@@ -3,15 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\PasswordReset;
+
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ResetPassword;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller {
 
     public function __construct() {
-        $this->middleware('auth:api',['except' => ['user','me','login', 'register', 'emailVerify', 'routeEmailVerify']]);
+        $this->middleware('auth:api',['except' => [
+            'user',
+            'me',
+            'login', 
+            'register', 
+            'emailVerify', 
+            'routeEmailVerify', 
+            'requestForgotPassword',
+            'resetPassword'
+        ]]);
     }
 
     public function login(Request $request) {
@@ -90,11 +106,11 @@ class AuthController extends Controller {
     }
 
     public function refresh(){
-        return $this->respondWithToken($this->guard()->refresh());
+        return $this->respondWithToken(Auth::refresh());
     }
 
     public function logout(){
-        $this->guard()->logout();
+        Auth::logout();
         return response()->json(['message' => 'Logged Out!']);
     }
 
@@ -111,6 +127,16 @@ class AuthController extends Controller {
         
         return response()->json('Email request verification sent to '. Auth::user()->email);
     
+    }
+
+    public function routeEmailVerify(Request $request){
+        $this->validate($request, [
+            'token' => 'required|string',
+        ]);
+
+        $token = $request->token;
+
+        return redirect("http://localhost:4200/email/verify?token=$token");
     }
 
     public function emailVerify(Request $request) {
@@ -134,15 +160,44 @@ class AuthController extends Controller {
         return response()->json('Email address '. $request->user()->email.' successfully verified.');
     }
 
+    public function requestForgotPassword(Request $request){
 
-    public function routeEmailVerify(Request $request){
-        $this->validate($request, [
-            'token' => 'required|string',
-        ]);
+        if(User::where('email',$request->email)->exists()) {
 
-        $token = $request->token;
+            $user = User::where('email',$request->email)->first();
+            $token = Str::random(40);
+            $datetime = Carbon::now()->format('Y-m-d H:i:s');
+            PasswordReset::updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'email' => $user->email,
+                    'token' => $token,
+                    'created_at' => $datetime 
+                ]
+            );
 
-        return redirect("http://localhost:4200/email/verify?token=$token");
+            Notification::send($user, new ResetPassword($token));
+
+            return response()->json('Reset password request was sent to your email address '. $request->email);
+ 
+        } else {
+            return response()->json('Email address '. $request->email. ' does not exist!');
+        }
+    }
+
+    public function resetPassword(Request $request){
+
+        if(PasswordReset::where('token', $request->token)->exists()){
+            $resetData = PasswordReset::where('token', $request->token)->get();
+            $user = User::where('email',$resetData[0]['email'])->get();
+            dd($user);
+
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token does not exist or expired'
+            ]);
+        }
     }
 
 }

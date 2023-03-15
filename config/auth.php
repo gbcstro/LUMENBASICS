@@ -13,16 +13,16 @@
             ],
         ],
 
-        // 'passwords' => [
-        //     'user' => [
-        //         'provider' => 'user',
-        //         'table' => 'password_resets',
-        //         'expire' => 60,
-        //         'throttle' => 60,
-        //     ],
-        //   ],
+        'passwords' => [
+            'user' => [
+                'provider' => 'user',
+                'table' => 'password_resets',
+                'expire' => 60,
+                'throttle' => 60,
+            ],
+          ],
 
-        // 'password_timeout' => 10800,
+        'password_timeout' => 10800,
         
         'providers' => [
             'users' => [
