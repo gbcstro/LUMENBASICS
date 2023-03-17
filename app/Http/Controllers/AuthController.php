@@ -22,11 +22,13 @@ class AuthController extends Controller {
             'user',
             'me',
             'login', 
-            'register', 
+            'register',
+            'logout', 
             'emailVerify', 
             'routeEmailVerify', 
             'requestForgotPassword',
-            'resetPassword'
+            'resetPassword',
+            'routeResetPassword'
         ]]);
     }
 
@@ -43,6 +45,14 @@ class AuthController extends Controller {
                 'message' => $validator->errors()->all()
             );
         }
+
+        if(!User::where('email',$request->email)->exists()){
+
+            return response()->json([
+                'success' => false,
+                'message' => 'User does not exist'
+            ]);
+        }
        
         $input = $request->only('email', 'password');
         $authorized = Auth::attempt($input);
@@ -50,19 +60,21 @@ class AuthController extends Controller {
         if( !$authorized ){
             $code = 401;
             $output = [
+                'success' => false,
                 'code' => $code,
-                'message' => 'User does not exist'
+                'message' => 'Incorrect Credentials'
             ];
         } else {
             $token = $this->respondWithToken($authorized);
             $code = 201;
             $output = [
+                'success' => true,
                 'code' => $code,
                 'message' => 'User logged in succesfully',
                 'token' => $token
             ];
         }
-        return response()->json($output, $code);
+        return response()->json($output);
     }
 
     public function register(Request $request) {
@@ -160,6 +172,18 @@ class AuthController extends Controller {
         return response()->json('Email address '. $request->user()->email.' successfully verified.');
     }
 
+    public function routeResetPassword(Request $request){
+
+        $this->validate($request, [
+            'token' => 'required|string',
+        ]);
+
+        $token = $request->token;
+
+        return redirect("http://localhost:4200/email/password/reset?token=$token");
+
+    }
+
     public function requestForgotPassword(Request $request){
 
         if(User::where('email',$request->email)->exists()) {
@@ -178,19 +202,47 @@ class AuthController extends Controller {
 
             Notification::send($user, new ResetPassword($token));
 
-            return response()->json('Reset password request was sent to your email address '. $request->email);
+            return response()->json([
+                'success' => true,
+                'message' => 'Reset password request was sent to your email address '. $request->email
+            ]);
  
         } else {
-            return response()->json('Email address '. $request->email. ' does not exist!');
+            return response()->json([
+                'success' => false,
+                'message' => 'Email address '. $request->email. ' does not exist!'
+            ]);
         }
     }
 
     public function resetPassword(Request $request){
 
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+            'password' => 'required'
+        ]);
+
+        if($validator->fails()) {
+            return array(
+                'success' => false,
+                'message' => $validator->errors()->all()
+            );
+        }
+
         if(PasswordReset::where('token', $request->token)->exists()){
             $resetData = PasswordReset::where('token', $request->token)->get();
-            $user = User::where('email',$resetData[0]['email'])->get();
-            dd($user);
+            $user = User::where('email',$resetData[0]['email'])->first();
+            
+            $password = $request->password;
+            $user->password = app('hash')->make($password);
+            $user->save();
+
+            PasswordReset::where('email',$user->email)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password has been reset successfully'
+            ]);
 
         } else {
             return response()->json([

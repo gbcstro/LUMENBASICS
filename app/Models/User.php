@@ -23,21 +23,11 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public $table = 'user';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var string[]
-     */
     protected $fillable = [
         'first_name', 'last_name', 'email', 'password'
 
     ];
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var string[]
-     */
     protected $hidden = [
         'password', 'id', 'created_at', 'updated_at', 'remember_token'
     ];
@@ -57,6 +47,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected static function boot(){
         parent::boot();
         static::saved(function ($model) {
+
         /**
         * If user email have changed email verification is required
         */

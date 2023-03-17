@@ -36,7 +36,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->post('register', 'AuthController@register');
     $router->get('me', 'AuthController@me');
     $router->get('refresh', 'AuthController@refresh');
-    $router->post('logout', 'AuthController@logout');
+    $router->get('logout', 'AuthController@logout');
 });
 
 $router->group(['prefix' => 'email'], function () use ($router){
@@ -48,6 +48,7 @@ $router->group(['prefix' => 'email'], function () use ($router){
 
     $router->group(['prefix' => 'password'], function () use ($router){
         $router->post('request-reset-password', 'AuthController@requestForgotPassword');
+        $router->get('reset-redirect', ['as' => 'reset.redirect', 'uses' => 'AuthController@routeResetPassword']);
         $router->post('reset-password', 'AuthController@resetPassword');
     });
 
