@@ -4,13 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 class TaskController extends Controller {
     
-    public function index(){
-        return Task::all();
+    public function index(Request $request){
+        $query = DB::table('tasks');
+        if ($request->has('user')) {
+            $task = $query->where('assign_to','LIKE', $request->get('user'));
+            return $task->get();
+        }
+        else if ($request->has('search')){
+            $search = $query->where('title','LIKE', $request->get('search').'%')
+                            ->orwhere('description', 'LIKE', '%'.$request->get('search').'%')
+                            ->orwhere('status', 'LIKE', $request->get('search').'%')
+                            ->orwhere('assign_to', 'LIKE', $request->get('search').'%');
+            return $search->get();
+        } else {
+            return Task::all();
+        }
+        
     }
 
     public function get($id){
