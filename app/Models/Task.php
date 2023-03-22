@@ -22,5 +22,9 @@ class Task extends Model {
      */
     protected $fillable = [
         'title', 'description', 'status', 'created_by', 'assign_to'
-    ]; 
+    ];
+
+    protected $hidden = [
+        'created_at', 'updated_at'
+    ];
 }

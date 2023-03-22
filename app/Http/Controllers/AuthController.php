@@ -230,9 +230,8 @@ class AuthController extends Controller {
         }
 
         if(PasswordReset::where('token', $request->token)->exists()){
-            $resetData = PasswordReset::where('token', $request->token)->get();
-            $user = User::where('email',$resetData[0]['email'])->first();
-            
+            $resetData = PasswordReset::where('token', $request->token)->first();
+            $user = User::where('email',$resetData->email)->first();
             $password = $request->password;
             $user->password = app('hash')->make($password);
             $user->save();
