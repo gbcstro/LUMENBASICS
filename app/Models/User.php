@@ -24,7 +24,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public $table = 'user';
 
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password'
+        'user_id','first_name', 'last_name', 'email', 'password'
 
     ];
 
@@ -59,6 +59,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     public function tasks() {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(Task::class, 'assign_to', 'full_name');
     }
 }

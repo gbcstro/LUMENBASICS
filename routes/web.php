@@ -18,30 +18,34 @@ $router->get('/', function () use ($router) {
 });
 
 
-$router->get('/send-email', 'EmailController@sendResetPasswordEmail');
+$router->post('test', 'TaskController@test');
 
+$router->group(['prefix' => 'auth'], function () use ($router) {
+    $router->post('login', 'AuthController@login');
+    $router->post('register', 'AuthController@register');
+    $router->get('user', 'AuthController@user');
+    $router->get('refresh', 'AuthController@refresh');
 
+    $router->group(['middleware' => 'auth'], function () use ($router) {
+        $router->get('me', 'AuthController@me');
+        $router->get('logout', 'AuthController@logout');
+    });
 
-$router->group(['prefix' => 'api'], function () use ($router) {
-    $router->post('tasks', 'TaskController@index');
-    $router->get('/task/{id}', 'TaskController@get');
-    $router->post('add', 'TaskController@add');
+});
+
+$router->group(['prefix' => 'task' , 'middleware' => 'auth'], function () use ($router){
+    $router->post('index', 'TaskController@index');
+    $router->get('index/{id}', 'TaskController@get');
+    $router->post('create', 'TaskController@add');
     $router->put('update/{id}', 'TaskController@update');
     $router->put('update/{id}/assign', 'TaskController@assign');
     $router->delete('delete/{id}', 'TaskController@delete');
     $router->delete('deleteAll', 'TaskController@deleteAll');
-
-    $router->get('user', 'AuthController@user');
-    $router->post('login', 'AuthController@login');
-    $router->post('register', 'AuthController@register');
-    $router->get('me', 'AuthController@me');
-    $router->get('refresh', 'AuthController@refresh');
-    $router->get('logout', 'AuthController@logout');
 });
 
 $router->group(['prefix' => 'email'], function () use ($router){
     $router->group(['middleware' => ['auth','verified']], function () use ($router) {
-        $router->post('request-verification', ['as' => 'email.request.verification', 'uses' => 'AuthController@emailRequestVerification']);
+        $router->post('request-verification', ['as' => 'email.request.verification', 'uses' => 'AuthController@emailReguestVerification']);
     });
     $router->get('redirect',['as' => 'email.redirect', 'uses' => 'AuthController@routeEmailVerify']);
     $router->post('verify', 'AuthController@emailVerify');

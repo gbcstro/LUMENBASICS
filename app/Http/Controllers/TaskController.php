@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -26,6 +27,11 @@ class TaskController extends Controller {
             return Task::all();
         }
         
+    }
+
+    public function test(Request $request){
+        $task = User::where('email', $request->email)->with('tasks')->first();
+        return $task;
     }
 
     public function get($id){
@@ -67,7 +73,7 @@ class TaskController extends Controller {
 
     public function update(Request $request, $id){
 
-        if (Task::where('id', $id)->exists()){
+        if (Task::where('task_id', $id)->exists()){
 
             $validator = Validator::make($request->all(), [
                 'title' => 'required',
@@ -107,7 +113,7 @@ class TaskController extends Controller {
     }
 
     public function assign(Request $request, $id){
-        if (Task::where('id', $id)->exists()){
+        if (Task::where('task_id', $id)->exists()){
 
             $validator = Validator::make($request->all(), [
                 'assign_to' => 'required',
@@ -120,7 +126,7 @@ class TaskController extends Controller {
                 );
             }
 
-            $task = Task::find($id);
+            $task = Task::where('task_id', $id);
             $task->assign_to = $request->assign_to;
             $task->save();
 
@@ -138,8 +144,8 @@ class TaskController extends Controller {
     }
 
     public function delete($id){
-        if (Task::where('id', $id)->exists()){
-            $task = Task::find($id); 
+        if (Task::where('task_id', $id)->exists()){
+            $task = Task::where('task_id', $id);
             $task->delete();
 
             return response()->json([

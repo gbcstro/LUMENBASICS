@@ -14,22 +14,12 @@ use App\Notifications\ResetPassword;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Uuid;
 
 class AuthController extends Controller {
 
     public function __construct() {
-        $this->middleware('auth:api',['except' => [
-            'user',
-            'me',
-            'login', 
-            'register',
-            'logout', 
-            'emailVerify', 
-            'routeEmailVerify', 
-            'requestForgotPassword',
-            'resetPassword',
-            'routeResetPassword'
-        ]]);
+        
     }
 
     public function login(Request $request) {
@@ -94,6 +84,7 @@ class AuthController extends Controller {
         }
 
         $user = new User;
+        $user->user_id = Uuid::uuid4();
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->email = $request->email;
@@ -110,7 +101,7 @@ class AuthController extends Controller {
     }
 
     public function user(){
-        return response()->json(User::select('first_name','last_name')->get());
+        return response()->json(User::select('full_name')->get());
     }
 
     public function me(){
@@ -120,7 +111,7 @@ class AuthController extends Controller {
     public function refresh(){
         return $this->respondWithToken(Auth::refresh());
     }
-
+ 
     public function logout(){
         Auth::logout();
         return response()->json(['message' => 'Logged Out!']);
